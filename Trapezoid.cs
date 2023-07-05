@@ -1,23 +1,28 @@
 class TrapezoidCorrector
 {
-    public Coordinate TopLeft;
-    public Coordinate TopRight;
-    public Coordinate BottomLeft;
-    public Coordinate BottomRight;
+    public Quadrilateral Quadrilateral;
     public int Rows;
     public int Columns;
     // Create a class constructor with a parameter
-    public TrapezoidCorrector(Coordinate topLeft, Coordinate topRight, Coordinate bottomLeft, Coordinate bottomRight, int rows, int columns)
+    public TrapezoidCorrector(Quadrilateral quadrilateral, int rows, int columns)
     {
-        TopLeft = topLeft;
-        TopRight = topRight;
-        BottomLeft = bottomLeft;
-        BottomRight = bottomRight;
+        Quadrilateral = quadrilateral;
         Rows = rows;
         Columns = columns;
     }
-
-    public static List<Coordinate> GetLineCoordinates(Coordinate start, Coordinate end, int numDelta)
+    public List<Coordinate> getStartingPoints()
+    {
+        List<Coordinate> startRowCoordinates = GetLineCoordinates(Quadrilateral.TopLeft, Quadrilateral.TopRight, Rows);
+        List<Coordinate> endRowCoordinates = GetLineCoordinates(Quadrilateral.BottomLeft, Quadrilateral.BottomRight, Rows);
+        List<Coordinate> startPositions = new List<Coordinate>();
+        for (int i = 0; i < startRowCoordinates.Count; i++)
+        {
+            List<Coordinate> startRowPositions = GetLineCoordinates(startRowCoordinates[i], endRowCoordinates[i], Columns);
+            startPositions.AddRange(startRowPositions);
+        }
+        return startPositions;
+    }
+    static List<Coordinate> GetLineCoordinates(Coordinate start, Coordinate end, int numDelta)
     {
         // Convert two coordinate into an line equation
         double deltaX = (end.X - start.X) / numDelta;
@@ -29,22 +34,9 @@ class TrapezoidCorrector
         }
         return result;
     }
-    public List<Coordinate> Process()
-    {
-        List<Coordinate> startRowCoordinates = GetLineCoordinates(TopLeft, TopRight, Rows);
-        List<Coordinate> endRowCoordinates = GetLineCoordinates(BottomLeft, BottomRight, Rows);
-        List<Coordinate> startPositions = new List<Coordinate>();
-        for (int i = 0; i < startRowCoordinates.Count; i++)
-        {
-            List<Coordinate> startRowPositions = GetLineCoordinates(startRowCoordinates[i], endRowCoordinates[i], Columns);
-            startPositions.AddRange(startRowPositions);
-        }
-        Console.WriteLine($"Stuff has been processed");
-        return startPositions;
-    }
 }
 
-class Coordinate
+public class Coordinate
 {
     public double X;
     public double Y;
@@ -54,3 +46,29 @@ class Coordinate
         Y = y;
     }
 }
+
+public class Quadrilateral
+{
+    public Coordinate TopLeft;
+    public Coordinate TopRight;
+    public Coordinate BottomLeft;
+    public Coordinate BottomRight;
+    public Quadrilateral(Coordinate topLeft, Coordinate topRight, Coordinate bottomLeft, Coordinate bottomRight)
+    {
+        TopLeft = topLeft;
+        TopRight = topRight;
+        BottomLeft = bottomLeft;
+        BottomRight = bottomRight;
+    }
+    public double[,] convertToDouble()
+    {
+        double[,] result =
+        {
+            { TopLeft.X, TopLeft.Y },
+            { TopRight.X, TopRight.Y },
+            { BottomLeft.X, BottomLeft.Y },
+            { BottomRight.X, BottomRight.Y }
+        };
+        return result;
+    }
+};
